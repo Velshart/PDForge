@@ -3,8 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 </head>
 <body>
-<h5>Home page</h5>
+
+<form id="quillEditorForm">
+    <div id="quillEditor"></div>
+    <br>
+</form>
+
+<input type="hidden" name="delta" id="deltaInput">
+<input type="hidden" name="htmlContent" id="htmlInput"/>
+
 </body>
+
+<script>
+    const quill = new Quill('#quillEditor', {theme: 'snow'});
+    document.getElementById('quillEditorForm').addEventListener('submit', function () {
+
+        const delta = quill.getContents();
+        const html = quill.root.innerHTML;
+
+        document.getElementById('deltaInput').value = JSON.stringify(delta);
+        document.getElementById('htmlInput').value = html;
+    });
+</script>
 </html>

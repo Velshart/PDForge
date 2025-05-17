@@ -2,6 +2,7 @@ package me.mmtr.pdforge.controller;
 
 import me.mmtr.pdforge.model.User;
 import me.mmtr.pdforge.repository.UserRepository;
+import me.mmtr.pdforge.service.PdfService;
 import me.mmtr.pdforge.service.UserServiceImplementation;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,9 +17,12 @@ public class ApplicationMainController {
     private final UserServiceImplementation userService;
     private final UserRepository userRepository;
 
-    public ApplicationMainController(UserServiceImplementation userService, UserRepository userRepository) {
+    private final PdfService pdfService;
+
+    public ApplicationMainController(UserServiceImplementation userService, UserRepository userRepository, PdfService pdfService) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.pdfService = pdfService;
     }
 
     @GetMapping("/home")

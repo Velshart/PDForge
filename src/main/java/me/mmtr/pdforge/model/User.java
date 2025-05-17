@@ -7,15 +7,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.UUID;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "users")
 public class User {
     @Id
-    private UUID id = UUID.randomUUID();
+    private String id;
 
     @Indexed(unique = true)
     private String username;
