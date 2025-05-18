@@ -12,6 +12,7 @@ import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.xhtmlrenderer.layout.SharedContext;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -30,7 +31,13 @@ public class PdfService {
     @Value(value = "${spring.data.mongodb.database}")
     private String mongoDatabaseName;
 
-    public void generateAndSavePdfFromHTML(String userId, String filename, String html, String delta) {
+    private final MongoTemplate mongoTemplate;
+
+    public PdfService(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
+
+    public void saveAsPdf(String userId, String filename, String html, String delta) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             Document document = Jsoup.parse(html, "UTF-8");
             document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
@@ -70,7 +77,7 @@ public class PdfService {
     }
 
 
-    public void getPdfFromDatabase(String filename) {
+    public void getAsPdf(String filename) {
         String filePath = filename + ".pdf";
         GridFSDownloadOptions options = new GridFSDownloadOptions().revision(0);
 
@@ -88,7 +95,7 @@ public class PdfService {
         }
     }
 
-    public List<GridFSFile> getUserFiles(String userId) {
+    public List<GridFSFile> getUserGridFSFiles(String userId) {
         try (MongoClient mongoClient = MongoClients.create(mongoDatabaseUri)) {
             MongoDatabase database = mongoClient.getDatabase("pdforge");
             GridFSBucket bucket = GridFSBuckets.create(database);
@@ -97,8 +104,8 @@ public class PdfService {
         }
     }
 
-    public GridFSFile getGridFSFileFromDatabase(String userId, String filename) {
-        return getUserFiles(userId)
+    public GridFSFile getAsGridFSFile(String userId, String filename) {
+        return getUserGridFSFiles(userId)
                 .stream()
                 .filter(file -> {
                     assert file.getMetadata() != null;
@@ -108,7 +115,7 @@ public class PdfService {
                         file.getFilename().equals(filename)).findFirst().orElse(null);
     }
 
-    public void deleteGridFSFileFromDatabase(String userId, String filename) {
+    public void deleteGridFSFile(String userId, String filename) {
         try (MongoClient mongoClient = MongoClients.create(mongoDatabaseUri)) {
             MongoDatabase database = mongoClient.getDatabase("pdforge");
             GridFSBucket bucket = GridFSBuckets.create(database);

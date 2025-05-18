@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
@@ -8,14 +8,27 @@
 </head>
 <body>
 
-<form id="quillEditorForm">
+<form th:action="@{/pdf/new}" id="quillEditorForm" method="post">
+
+    <div>
+        <label for="filename" class="form-label">Title</label>
+        <input
+                type="text"
+                id="filename"
+                name="filename"
+                placeholder="Enter the name of your file"
+                required
+        >
+    </div>
+
     <div id="quillEditor"></div>
     <br>
+
+    <input type="hidden" name="delta" id="deltaInput">
+    <input type="hidden" name="htmlContent" id="htmlInput"/>
+
+    <button type="submit">Create PDF document</button>
 </form>
-
-<input type="hidden" name="delta" id="deltaInput">
-<input type="hidden" name="htmlContent" id="htmlInput"/>
-
 </body>
 
 <script>
