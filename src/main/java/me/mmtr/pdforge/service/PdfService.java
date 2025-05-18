@@ -1,17 +1,12 @@
 package me.mmtr.pdforge.service;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
-import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.xhtmlrenderer.layout.SharedContext;
@@ -25,16 +20,19 @@ import java.util.List;
 public class PdfService {
 
     private final int MEGABYTE_IN_BYTES = 1048576;
-    @Value(value = "${spring.data.mongodb.uri}")
-    private String mongoDatabaseUri;
-
-    @Value(value = "${spring.data.mongodb.database}")
-    private String mongoDatabaseName;
+    private final String PDF_EXTENSION = ".pdf";
 
     private final MongoTemplate mongoTemplate;
 
+    private final ITextRenderer renderer;
+
     public PdfService(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
+        this.renderer = new ITextRenderer();
+        SharedContext sharedContext = renderer.getSharedContext();
+
+        sharedContext.setPrint(true);
+        sharedContext.setInteractive(false);
     }
 
     public void saveAsPdf(String userId, String filename, String html, String delta) {
@@ -42,22 +40,15 @@ public class PdfService {
             Document document = Jsoup.parse(html, "UTF-8");
             document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
 
-            ITextRenderer renderer = new ITextRenderer();
-            SharedContext sharedContext = renderer.getSharedContext();
-            sharedContext.setPrint(true);
-            sharedContext.setInteractive(false);
-
             renderer.setDocumentFromString(document.html());
             renderer.layout();
             renderer.createPDF(byteArrayOutputStream);
 
             byteArrayOutputStream.close();
 
-            try (MongoClient mongoClient = MongoClients.create(mongoDatabaseUri);
-                 InputStream inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray())) {
+            try (InputStream inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray())) {
 
-                MongoDatabase database = mongoClient.getDatabase(mongoDatabaseName);
-                GridFSBucket gridFSBucket = GridFSBuckets.create(database);
+                GridFSBucket gridFSBucket = GridFSBuckets.create(mongoTemplate.getDb());
 
                 org.bson.Document metadata = new org.bson.Document()
                         .append("type", "PDF file")
@@ -68,8 +59,7 @@ public class PdfService {
                         .chunkSizeBytes(MEGABYTE_IN_BYTES)
                         .metadata(metadata);
 
-                ObjectId fileId = gridFSBucket.uploadFromStream(filename + ".pdf", inputStream, options);
-                System.out.println("File id is: " + fileId);
+                gridFSBucket.uploadFromStream(filename + PDF_EXTENSION, inputStream, options);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -78,14 +68,11 @@ public class PdfService {
 
 
     public void getAsPdf(String filename) {
-        String filePath = filename + ".pdf";
+        String filePath = filename + PDF_EXTENSION;
         GridFSDownloadOptions options = new GridFSDownloadOptions().revision(0);
 
-        try (FileOutputStream outputStream = new FileOutputStream(filePath);
-             MongoClient mongoClient = MongoClients.create(mongoDatabaseUri)
-        ) {
-            MongoDatabase database = mongoClient.getDatabase(mongoDatabaseName);
-            GridFSBucket bucket = GridFSBuckets.create(database);
+        try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
+            GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
 
             bucket.downloadToStream(filePath, outputStream, options);
 
@@ -96,12 +83,9 @@ public class PdfService {
     }
 
     public List<GridFSFile> getUserGridFSFiles(String userId) {
-        try (MongoClient mongoClient = MongoClients.create(mongoDatabaseUri)) {
-            MongoDatabase database = mongoClient.getDatabase("pdforge");
-            GridFSBucket bucket = GridFSBuckets.create(database);
+        GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
 
-            return bucket.find(new org.bson.Document("metadata.userId", userId)).into(new ArrayList<>());
-        }
+        return bucket.find(new org.bson.Document("metadata.userId", userId)).into(new ArrayList<>());
     }
 
     public GridFSFile getAsGridFSFile(String userId, String filename) {
@@ -116,12 +100,10 @@ public class PdfService {
     }
 
     public void deleteGridFSFile(String userId, String filename) {
-        try (MongoClient mongoClient = MongoClients.create(mongoDatabaseUri)) {
-            MongoDatabase database = mongoClient.getDatabase("pdforge");
-            GridFSBucket bucket = GridFSBuckets.create(database);
+        GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
 
-            bucket.find(new org.bson.Document("metadata.userId", userId).append("filename", filename + ".pdf"))
-                    .forEach(file -> bucket.delete(file.getObjectId()));
-        }
+        bucket.find(new org.bson.Document("metadata.userId", userId)
+                        .append("filename", filename + PDF_EXTENSION))
+                .forEach(file -> bucket.delete(file.getObjectId()));
     }
 }
