@@ -33,6 +33,7 @@
 
 <script>
     const quill = new Quill('#quillEditor', {theme: 'snow'});
+
     document.getElementById('quillEditorForm').addEventListener('submit', function () {
 
         const delta = quill.getContents();

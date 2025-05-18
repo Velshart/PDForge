@@ -1,7 +1,6 @@
 package me.mmtr.pdforge.configuration;
 
 import me.mmtr.pdforge.handler.LoginSuccessHandler;
-import me.mmtr.pdforge.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
