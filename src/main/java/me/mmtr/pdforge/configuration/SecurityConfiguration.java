@@ -28,6 +28,7 @@ public class SecurityConfiguration {
                         authorizeRequests
                                 .requestMatchers("/register").permitAll()
                                 .requestMatchers("/login").permitAll()
+                                .requestMatchers("/fragments/**").permitAll()
                                 .anyRequest().authenticated())
                 .formLogin(formLogin ->
                         formLogin.loginPage("/login")
