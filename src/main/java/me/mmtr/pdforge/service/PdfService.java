@@ -103,7 +103,7 @@ public class PdfService {
         GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
 
         bucket.find(new org.bson.Document("metadata.userId", userId)
-                        .append("filename", filename + PDF_EXTENSION))
+                        .append("filename", filename))
                 .forEach(file -> bucket.delete(file.getObjectId()));
     }
 }

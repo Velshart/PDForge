@@ -4,6 +4,8 @@ import me.mmtr.pdforge.model.User;
 import me.mmtr.pdforge.repository.UserRepository;
 import me.mmtr.pdforge.service.PdfService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,8 +37,22 @@ public class PdfController {
                 htmlContent,
                 delta
         );
-
-        pdfService.getAsPdf(filename);
         return "redirect:/home";
+    }
+
+    @GetMapping("/user-documents")
+    public String userPdfs(Principal principal, Model model) {
+        User principalUser = userRepository.findByUsername(principal.getName()).orElseThrow();
+        model.addAttribute("files", pdfService.getUserGridFSFiles(principalUser.getId()));
+
+        return "user-documents";
+    }
+
+    @PostMapping("/delete")
+    public String deletePdfDocument(@RequestParam String filename, Principal principal) {
+        User principalUser = userRepository.findByUsername(principal.getName()).orElseThrow();
+        pdfService.deleteGridFSFile(principalUser.getId(), filename);
+
+        return "redirect:/pdf/user-documents";
     }
 }
