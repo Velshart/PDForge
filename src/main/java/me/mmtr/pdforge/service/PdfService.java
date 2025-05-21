@@ -20,7 +20,6 @@ import java.util.List;
 @Service
 public class PdfService {
 
-    private final int MEGABYTE_IN_BYTES = 1048576;
     private final String PDF_EXTENSION = ".pdf";
 
     private final MongoTemplate mongoTemplate;
@@ -56,6 +55,7 @@ public class PdfService {
                         .append("delta", delta)
                         .append("userId", userId);
 
+                int MEGABYTE_IN_BYTES = 1048576;
                 GridFSUploadOptions options = new GridFSUploadOptions()
                         .chunkSizeBytes(MEGABYTE_IN_BYTES)
                         .metadata(metadata);
