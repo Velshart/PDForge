@@ -5,6 +5,7 @@ import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
+import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -66,7 +67,6 @@ public class PdfService {
         }
     }
 
-
     public void getAsPdf(String filename) {
         String filePath = filename + PDF_EXTENSION;
         GridFSDownloadOptions options = new GridFSDownloadOptions().revision(0);
@@ -80,6 +80,34 @@ public class PdfService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void getAsPdfId(String filename, ObjectId id) {
+
+        try (FileOutputStream outputStream = new FileOutputStream(filename)) {
+            GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
+
+            bucket.downloadToStream(id, outputStream);
+
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public byte[] getAsByteArrayStream(ObjectId id) throws IOException {
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
+
+        GridFSFile file = bucket.find(new org.bson.Document("_id", id)).first();
+
+        if (file == null) {
+            throw new IOException("File not found");
+        }
+
+        bucket.downloadToStream(file.getObjectId(), outputStream);
+        return outputStream.toByteArray();
     }
 
     public List<GridFSFile> getUserGridFSFiles(String userId) {
