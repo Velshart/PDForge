@@ -31,7 +31,7 @@
                         </form>
 
                         <form th:action="@{/pdf/delete}" method="post">
-                            <input type="hidden" name="filename" th:value="${file.getFilename()}">
+                            <input type="hidden" name="objectId" th:value="${file.getObjectId()}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                         </form>
                     </div>

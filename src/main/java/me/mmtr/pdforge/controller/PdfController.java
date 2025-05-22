@@ -52,9 +52,8 @@ public class PdfController {
     }
 
     @PostMapping("/delete")
-    public String deletePdfDocument(@RequestParam String filename, Principal principal) {
-        User principalUser = userRepository.findByUsername(principal.getName()).orElseThrow();
-        pdfService.deleteGridFSFile(principalUser.getId(), filename);
+    public String deletePdfDocument(@RequestParam ObjectId objectId) {
+        pdfService.deleteGridFSFile(objectId);
 
         return "redirect:/pdf/user-documents";
     }
