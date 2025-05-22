@@ -31,8 +31,13 @@ public class PdfController {
     public String newPdfDocument(@RequestParam String filename,
                                  @RequestParam String delta,
                                  @RequestParam String htmlContent,
+                                 @RequestParam(required = false) ObjectId updatedDocumentObjectId,
                                  Principal principal) {
         User principalUser = userRepository.findByUsername(principal.getName()).orElseThrow();
+
+        if (updatedDocumentObjectId != null) {
+            pdfService.deleteGridFSFile(updatedDocumentObjectId);
+        }
 
         pdfService.saveAsPdf(
                 principalUser.getId(),

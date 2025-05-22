@@ -1,9 +1,11 @@
 package me.mmtr.pdforge.controller;
 
+import com.mongodb.client.gridfs.model.GridFSFile;
 import me.mmtr.pdforge.model.User;
 import me.mmtr.pdforge.repository.UserRepository;
 import me.mmtr.pdforge.service.PdfService;
 import me.mmtr.pdforge.service.UserServiceImplementation;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,6 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.security.Principal;
+import java.util.Objects;
 
 @Controller
 public class ApplicationMainController {
@@ -26,7 +31,27 @@ public class ApplicationMainController {
     }
 
     @GetMapping("/home")
-    public String home() {
+    public String home(Principal principal,
+                       @RequestParam(required = false) ObjectId updatedDocumentObjectId, Model model) {
+
+        User principalUser = userRepository.findByUsername(principal.getName()).orElseThrow();
+
+        GridFSFile updatedDocument = null;
+        String delta = null;
+        if (updatedDocumentObjectId != null) {
+            updatedDocument = pdfService.getAsGridFSFileId(principalUser.getId(), updatedDocumentObjectId);
+            delta = Objects.requireNonNull(
+                    pdfService.getAsGridFSFileId(principalUser.getId(),
+                            updatedDocumentObjectId).getMetadata()
+            ).get("delta").toString();
+        }
+
+        model.addAttribute(
+                "updatedDocument",
+                updatedDocument
+        );
+
+        model.addAttribute("delta", delta);
         return "home";
     }
 

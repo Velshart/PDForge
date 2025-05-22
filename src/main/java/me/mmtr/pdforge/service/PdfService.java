@@ -127,6 +127,15 @@ public class PdfService {
                         file.getFilename().equals(filename)).findFirst().orElse(null);
     }
 
+    public GridFSFile getAsGridFSFileId(String userId, ObjectId objectId) {
+        return getUserGridFSFiles(userId)
+                .stream()
+                .filter(gridFSFile ->
+                        gridFSFile.getObjectId().equals(objectId))
+                .findFirst()
+                .orElse(null);
+    }
+
     public void deleteGridFSFile(ObjectId id) {
         GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
         bucket.find(new org.bson.Document("_id", id))

@@ -22,21 +22,30 @@
 
             <div class="mb-3">
                 <label for="filename"></label><input
-                        type="text"
-                        class="form-control"
-                        id="filename"
-                        name="filename"
-                        placeholder="Enter the name of your file"
-                        required
-                >
+                    type="text"
+                    class="form-control"
+                    id="filename"
+                    name="filename"
+                    placeholder="Enter the name of your file"
+                    th:value="${updatedDocument == null ? '' : updatedDocument.filename.split('\.')[0]}"
+                    required
+            >
             </div>
 
-            <div id="quillEditor" class="bg-white border mb-3" style="height: 60vh;"></div>
+            <div id="quillEditor"
+                 class="bg-white border mb-3" style="height: 60vh;">
+            </div>
 
             <input type="hidden" name="delta" id="deltaInput">
             <input type="hidden" name="htmlContent" id="htmlInput"/>
 
             <div class="d-flex justify-content-center">
+                <input
+                        th:if="${updatedDocument != null}"
+                        type="hidden"
+                        name="updatedDocumentObjectId"
+                        th:value="${updatedDocument.objectId}"
+                >
                 <button type="submit" class="btn btn-primary">Create PDF document</button>
             </div>
 
@@ -46,13 +55,18 @@
 
 </body>
 
-<script>
+<script th:inline="javascript">
     const quill = new Quill('#quillEditor', {theme: 'snow'});
 
-    document.getElementById('quillEditorForm').addEventListener('submit', function () {
+    const savedDelta = /*[[${delta}]]*/ '{}';
+    if (savedDelta !== '{}') {
+        quill.setContents(JSON.parse(savedDelta));
+    }
 
+    document.getElementById('quillEditorForm').addEventListener('submit', function () {
         const delta = quill.getContents();
         const html = quill.root.innerHTML;
+
 
         document.getElementById('deltaInput').value = JSON.stringify(delta);
         document.getElementById('htmlInput').value = html;
