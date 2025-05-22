@@ -39,9 +39,9 @@ public class ApplicationMainController {
         GridFSFile updatedDocument = null;
         String delta = null;
         if (updatedDocumentObjectId != null) {
-            updatedDocument = pdfService.getAsGridFSFileId(principalUser.getId(), updatedDocumentObjectId);
+            updatedDocument = pdfService.getAsGridFSFile(principalUser.getId(), updatedDocumentObjectId);
             delta = Objects.requireNonNull(
-                    pdfService.getAsGridFSFileId(principalUser.getId(),
+                    pdfService.getAsGridFSFile(principalUser.getId(),
                             updatedDocumentObjectId).getMetadata()
             ).get("delta").toString();
         }

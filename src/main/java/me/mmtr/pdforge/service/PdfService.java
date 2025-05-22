@@ -2,7 +2,6 @@ package me.mmtr.pdforge.service;
 
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
-import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 import org.bson.types.ObjectId;
@@ -19,8 +18,6 @@ import java.util.List;
 
 @Service
 public class PdfService {
-
-    private final String PDF_EXTENSION = ".pdf";
 
     private final MongoTemplate mongoTemplate;
 
@@ -55,11 +52,12 @@ public class PdfService {
                         .append("delta", delta)
                         .append("userId", userId);
 
-                int MEGABYTE_IN_BYTES = 1048576;
+                final int MEGABYTE_IN_BYTES = 1048576;
                 GridFSUploadOptions options = new GridFSUploadOptions()
                         .chunkSizeBytes(MEGABYTE_IN_BYTES)
                         .metadata(metadata);
 
+                final String PDF_EXTENSION = ".pdf";
                 gridFSBucket.uploadFromStream(filename + PDF_EXTENSION, inputStream, options);
             }
         } catch (IOException e) {
@@ -67,22 +65,7 @@ public class PdfService {
         }
     }
 
-    public void getAsPdf(String filename) {
-        String filePath = filename + PDF_EXTENSION;
-        GridFSDownloadOptions options = new GridFSDownloadOptions().revision(0);
-
-        try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
-            GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
-
-            bucket.downloadToStream(filePath, outputStream, options);
-
-            outputStream.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void getAsPdfId(String filename, ObjectId id) {
+    public void getAsPdf(String filename, ObjectId id) {
 
         try (FileOutputStream outputStream = new FileOutputStream(filename)) {
             GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
@@ -116,18 +99,7 @@ public class PdfService {
         return bucket.find(new org.bson.Document("metadata.userId", userId)).into(new ArrayList<>());
     }
 
-    public GridFSFile getAsGridFSFile(String userId, String filename) {
-        return getUserGridFSFiles(userId)
-                .stream()
-                .filter(file -> {
-                    assert file.getMetadata() != null;
-                    return file.getMetadata().get("userId").equals(userId);
-                })
-                .filter(file ->
-                        file.getFilename().equals(filename)).findFirst().orElse(null);
-    }
-
-    public GridFSFile getAsGridFSFileId(String userId, ObjectId objectId) {
+    public GridFSFile getAsGridFSFile(String userId, ObjectId objectId) {
         return getUserGridFSFiles(userId)
                 .stream()
                 .filter(gridFSFile ->
