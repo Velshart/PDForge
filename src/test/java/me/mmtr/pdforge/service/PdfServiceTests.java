@@ -74,7 +74,7 @@ public class PdfServiceTests {
     }
 
     @Test
-    public void shouldCorrectlyFindAndReturnFileAsByteArrayStream()
+    public void shouldCorrectlyFindAndReturnFileAsByteArray()
             throws IOException {
         String contentToSave = "Some string for testing";
         InputStream inputStream = new ByteArrayInputStream(contentToSave.getBytes());
@@ -83,7 +83,7 @@ public class PdfServiceTests {
 
         ObjectId objectId = gridFSBucket.uploadFromStream(firstFilename + EXTENSION, inputStream);
 
-        byte[] bytes = pdfService.getAsByteArrayStream(objectId);
+        byte[] bytes = pdfService.getAsByteArray(objectId);
 
         Assertions.assertEquals(contentToSave, new String(bytes));
 
@@ -92,9 +92,9 @@ public class PdfServiceTests {
     }
 
     @Test
-    public void shouldThrowAnExceptionWhenTryingToGetNonExistingFileAsByteArrayStream() {
+    public void shouldThrowAnExceptionWhenTryingToGetNonExistingFileAsByteArray() {
         Assertions.assertThrows(IOException.class, () ->
-                pdfService.getAsByteArrayStream(new ObjectId())
+                pdfService.getAsByteArray(new ObjectId())
         );
     }
 

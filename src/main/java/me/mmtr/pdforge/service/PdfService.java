@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 import org.xhtmlrenderer.layout.SharedContext;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,14 +62,14 @@ public class PdfService {
 
                 final String PDF_EXTENSION = ".pdf";
 
-               return gridFSBucket.uploadFromStream(filename + PDF_EXTENSION, inputStream, options);
+                return gridFSBucket.uploadFromStream(filename + PDF_EXTENSION, inputStream, options);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public byte[] getAsByteArrayStream(ObjectId id) throws IOException {
+    public byte[] getAsByteArray(ObjectId id) throws IOException {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());

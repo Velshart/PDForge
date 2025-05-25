@@ -67,7 +67,7 @@ public class PdfController {
     public ResponseEntity<byte[]> viewPdfDocument(@RequestParam ObjectId objectId,
                                                   @RequestParam String filename) throws IOException {
 
-        byte[] pdfFileBytes = pdfService.getAsByteArrayStream(objectId);
+        byte[] pdfFileBytes = pdfService.getAsByteArray(objectId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
