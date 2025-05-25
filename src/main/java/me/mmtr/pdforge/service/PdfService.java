@@ -65,19 +65,6 @@ public class PdfService {
         }
     }
 
-    public void getAsPdf(String filename, ObjectId id) {
-
-        try (FileOutputStream outputStream = new FileOutputStream(filename)) {
-            GridFSBucket bucket = GridFSBuckets.create(mongoTemplate.getDb());
-
-            bucket.downloadToStream(id, outputStream);
-
-            outputStream.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public byte[] getAsByteArrayStream(ObjectId id) throws IOException {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
