@@ -32,7 +32,7 @@ public class PdfService {
         sharedContext.setInteractive(false);
     }
 
-    public void saveAsPdf(String userId, String filename, String html, String delta) {
+    public ObjectId saveAsPdf(String userId, String filename, String html, String delta) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             Document document = Jsoup.parse(html, "UTF-8");
             document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
@@ -58,7 +58,8 @@ public class PdfService {
                         .metadata(metadata);
 
                 final String PDF_EXTENSION = ".pdf";
-                gridFSBucket.uploadFromStream(filename + PDF_EXTENSION, inputStream, options);
+
+               return gridFSBucket.uploadFromStream(filename + PDF_EXTENSION, inputStream, options);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
