@@ -24,7 +24,9 @@ public class ApplicationMainController {
 
     private final PdfService pdfService;
 
-    public ApplicationMainController(UserServiceImplementation userService, UserRepository userRepository, PdfService pdfService) {
+    public ApplicationMainController(UserServiceImplementation userService,
+                                     UserRepository userRepository,
+                                     PdfService pdfService) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.pdfService = pdfService;
@@ -32,25 +34,22 @@ public class ApplicationMainController {
 
     @GetMapping("/home")
     public String home(Principal principal,
-                       @RequestParam(required = false) ObjectId updatedDocumentObjectId, Model model) {
+                       @RequestParam(required = false) String objectId,
+                       Model model) {
 
         User principalUser = userRepository.findByUsername(principal.getName()).orElseThrow();
 
         GridFSFile updatedDocument = null;
         String delta = null;
-        if (updatedDocumentObjectId != null) {
-            updatedDocument = pdfService.getAsGridFSFile(principalUser.getId(), updatedDocumentObjectId);
+        if (objectId != null) {
+            ObjectId docId = new ObjectId(objectId);
+            updatedDocument = pdfService.getAsGridFSFile(principalUser.getId(), docId);
             delta = Objects.requireNonNull(
-                    pdfService.getAsGridFSFile(principalUser.getId(),
-                            updatedDocumentObjectId).getMetadata()
+                    updatedDocument.getMetadata()
             ).get("delta").toString();
         }
 
-        model.addAttribute(
-                "updatedDocument",
-                updatedDocument
-        );
-
+        model.addAttribute("updatedDocument", updatedDocument);
         model.addAttribute("delta", delta);
         return "home";
     }

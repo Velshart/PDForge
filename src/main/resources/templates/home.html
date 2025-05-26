@@ -43,8 +43,8 @@
                 <input
                         th:if="${updatedDocument != null}"
                         type="hidden"
-                        name="updatedDocumentObjectId"
-                        th:value="${updatedDocument.objectId}"
+                        name="objectId"
+                        th:value="${updatedDocument.objectId.toString()}"
                 >
                 <button type="submit" class="btn btn-primary">Create PDF document</button>
             </div>
