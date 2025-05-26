@@ -31,12 +31,12 @@ public class PdfController {
     public String newPdfDocument(@RequestParam String filename,
                                  @RequestParam String delta,
                                  @RequestParam String htmlContent,
-                                 @RequestParam(required = false) ObjectId updatedDocumentObjectId,
+                                 @RequestParam(required = false) String objectId,
                                  Principal principal) {
         User principalUser = userRepository.findByUsername(principal.getName()).orElseThrow();
 
-        if (updatedDocumentObjectId != null) {
-            pdfService.deleteGridFSFile(updatedDocumentObjectId);
+        if (objectId != null) {
+            pdfService.deleteGridFSFile(new ObjectId(objectId));
         }
 
         pdfService.saveAsPdf(
@@ -57,17 +57,17 @@ public class PdfController {
     }
 
     @PostMapping("/delete")
-    public String deletePdfDocument(@RequestParam ObjectId objectId) {
-        pdfService.deleteGridFSFile(objectId);
+    public String deletePdfDocument(@RequestParam String objectId) {
+        pdfService.deleteGridFSFile(new ObjectId(objectId));
 
         return "redirect:/pdf/user-documents";
     }
 
     @GetMapping("/view")
-    public ResponseEntity<byte[]> viewPdfDocument(@RequestParam ObjectId objectId,
+    public ResponseEntity<byte[]> viewPdfDocument(@RequestParam String objectId,
                                                   @RequestParam String filename) throws IOException {
 
-        byte[] pdfFileBytes = pdfService.getAsByteArray(objectId);
+        byte[] pdfFileBytes = pdfService.getAsByteArray(new ObjectId(objectId));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

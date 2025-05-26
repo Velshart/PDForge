@@ -26,17 +26,17 @@
                     <div class="d-flex gap-2">
                         <form th:action="@{/pdf/view}" method="get" target="_blank">
                             <input type="hidden" name="filename" th:value="${file.filename}">
-                            <input type="hidden" name="objectId" th:value="${file.objectId}">
+                            <input type="hidden" name="objectId" th:value="${file.objectId.toString()}">
                             <button type="submit" class="btn btn-outline-primary btn-sm">View</button>
                         </form>
 
                         <form th:action="@{/home}" method="get">
-                            <input type="hidden" name="updatedDocumentObjectId" th:value="${file.objectId}">
+                            <input type="hidden" name="objectId" th:value="${file.objectId.toString()}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">Edit</button>
                         </form>
 
                         <form th:action="@{/pdf/delete}" method="post">
-                            <input type="hidden" name="objectId" th:value="${file.objectId}">
+                            <input type="hidden" name="objectId" th:value="${file.objectId.toString()}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                         </form>
                     </div>
