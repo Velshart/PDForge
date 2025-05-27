@@ -54,7 +54,7 @@ public class ApplicationMainControllerTests {
 
         ObjectId testObjectId = new ObjectId("64e8c4f1f5a4c9453a6c2b91");
         Document metadata = new Document("delta", "some delta");
-        GridFSFile mockFile = new GridFSFile(
+        GridFSFile file = new GridFSFile(
                 new BsonObjectId(testObjectId),
                 "Test",
                 5L,
@@ -64,7 +64,7 @@ public class ApplicationMainControllerTests {
         );
 
         when(pdfService.getAsGridFSFile(eq(testUser.getId()), any(ObjectId.class)))
-                .thenReturn(mockFile);
+                .thenReturn(file);
 
         mockMvc.perform(get("/home")
                         .param("objectId", testObjectId.toString()))
